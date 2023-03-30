@@ -63,17 +63,8 @@ int main() {
     OLED_Init();
 
     while (1) {
-        HAL_GPIO_WritePin(GPIOB, LED_BLUE_Pin, GPIO_PIN_SET);
-        rt_thread_delay(5000);   /* 延时500个tick */
-        rt_kprintf("led1_thread running,LED1_ON\r\n");
-        OLED_ShowString(0, 0, "hello", 16);
-        OLED_Display_Update();
-
-        HAL_GPIO_WritePin(GPIOB, LED_BLUE_Pin, GPIO_PIN_RESET);
-        rt_thread_delay(5000);   /* 延时500个tick */
-        rt_kprintf("led1_thread running,LED1_OFF\r\n");
-        OLED_Clear();
-        OLED_Display_Update();
+        BUZZ_Beep(1);
+        rt_thread_delay(50000);
     }
 }
 

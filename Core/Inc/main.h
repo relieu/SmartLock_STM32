@@ -38,6 +38,8 @@ extern "C" {
 #include "i2c.h"
 
 #include "oled.h"
+#include "keys.h"
+#include "buzz.h"
 
 #include "rtthread.h"
 /* USER CODE END Includes */
@@ -69,6 +71,8 @@ void Error_Handler(void);
 #define LED_GREEN_GPIO_Port GPIOB
 #define LED_BLUE_Pin GPIO_PIN_1
 #define LED_BLUE_GPIO_Port GPIOB
+#define BUZZ_Pin GPIO_PIN_8
+#define BUZZ_GPIO_Port GPIOA
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
 
