@@ -57,12 +57,15 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+
+int main()
+{
+    ;
+}
+
 /* USER CODE END 0 */
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
+
 
 /**
   * @brief System Clock Configuration
