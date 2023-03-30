@@ -58,14 +58,31 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 
-int main()
-{
-    ;
+int main() {
+
+    OLED_Init();
+
+    while (1) {
+        HAL_GPIO_WritePin(GPIOB, LED_BLUE_Pin, GPIO_PIN_SET);
+        rt_thread_delay(5000);   /* 延时500个tick */
+        rt_kprintf("led1_thread running,LED1_ON\r\n");
+        OLED_ShowString(0, 0, "hello", 16);
+        OLED_Display_Update();
+
+        HAL_GPIO_WritePin(GPIOB, LED_BLUE_Pin, GPIO_PIN_RESET);
+        rt_thread_delay(5000);   /* 延时500个tick */
+        rt_kprintf("led1_thread running,LED1_OFF\r\n");
+        OLED_Clear();
+        OLED_Display_Update();
+    }
 }
 
 /* USER CODE END 0 */
 
-
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
 
 /**
   * @brief System Clock Configuration
@@ -138,11 +155,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1) {
+    }
   /* USER CODE END Error_Handler_Debug */
 }
 
