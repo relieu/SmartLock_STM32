@@ -192,3 +192,9 @@ void OLED_ShowString(uint8_t x, uint8_t y, const char *pStr, uint8_t size) {
     }
 //    OLED_Display_Update();//更新显示
 }
+
+//显示中文
+void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t number)
+{
+    //TODO 中文界面
+}

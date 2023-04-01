@@ -36,6 +36,7 @@ extern "C" {
 #include "gpio.h"
 #include "usart.h"
 #include "i2c.h"
+#include "tim.h"
 
 #include "oled.h"
 #include "keys.h"
@@ -67,17 +68,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BUZZKey_Pin GPIO_PIN_0
+#define BUZZKey_GPIO_Port GPIOA
 #define LED_GREEN_Pin GPIO_PIN_0
 #define LED_GREEN_GPIO_Port GPIOB
 #define LED_BLUE_Pin GPIO_PIN_1
 #define LED_BLUE_GPIO_Port GPIOB
-#define BUZZ_Pin GPIO_PIN_8
-#define BUZZ_GPIO_Port GPIOA
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define TRUE 1
+#define FALSE 0
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -56,7 +56,7 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t size)
 //显示字符串
 void OLED_ShowString(uint8_t x, uint8_t y, const char *pStr, uint8_t size);
 
-//显示中文 TODO
+//显示中文
 void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t number);
 
 #endif //SMARTLOCK_STM32_OLED_H
