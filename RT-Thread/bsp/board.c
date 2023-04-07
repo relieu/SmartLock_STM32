@@ -81,6 +81,7 @@ void rt_hw_board_init() {
     MX_I2C1_Init();
     MX_TIM1_Init();
     MX_SPI1_Init();
+    MX_RTC_Init();
 
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);

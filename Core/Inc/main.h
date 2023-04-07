@@ -38,6 +38,7 @@ extern "C" {
 #include "i2c.h"
 #include "tim.h"
 #include "spi.h"
+#include "rtc.h"
 
 #include "oled.h"
 #include "keys.h"
