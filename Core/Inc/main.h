@@ -37,10 +37,13 @@ extern "C" {
 #include "usart.h"
 #include "i2c.h"
 #include "tim.h"
+#include "spi.h"
 
 #include "oled.h"
 #include "keys.h"
 #include "buzz.h"
+#include "fingerprint.h"
+#include "flash.h"
 
 #include "rtthread.h"
 /* USER CODE END Includes */
@@ -68,6 +71,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define FLASH_SS_Pin GPIO_PIN_0
+#define FLASH_SS_GPIO_Port GPIOC
 #define BUZZKey_Pin GPIO_PIN_0
 #define BUZZKey_GPIO_Port GPIOA
 #define LED_GREEN_Pin GPIO_PIN_0
@@ -76,6 +81,8 @@ void Error_Handler(void);
 #define LED_BLUE_GPIO_Port GPIOB
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
+#define FP_INPUT_Pin GPIO_PIN_9
+#define FP_INPUT_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define TRUE 1

@@ -16,7 +16,6 @@ void BUZZ_Bell(void) {
     rt_thread_delay(100);
     //咚
     __HAL_TIM_SET_PRESCALER(&htim1, DONG_PSC);
-
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     rt_thread_delay(500);
     HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);

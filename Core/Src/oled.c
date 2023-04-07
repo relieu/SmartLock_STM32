@@ -95,7 +95,7 @@ void OLED_Display_Update(void) {
 void OLED_Clear(void) {
     uint8_t i, n;
     for (i = 0; i < 8; i++)for (n = 0; n < 128; n++)OLED_GRAM[n][i] = 0X00;
-    OLED_Display_Update(); //更新显示
+//    OLED_Display_Update(); //更新显示
 }
 
 //反色

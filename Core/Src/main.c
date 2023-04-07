@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -64,8 +65,10 @@ int main() {
     OLED_Init();
 
     while (1) {
-        if (HAL_GPIO_ReadPin(BUZZKey_GPIO_Port, BUZZKey_Pin))
+
+        if (HAL_GPIO_ReadPin(BUZZKey_GPIO_Port, BUZZKey_Pin)){
             KEYS_BellKey_Press();
+        }
     }
 }
 
