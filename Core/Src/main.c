@@ -66,6 +66,10 @@ int main() {
     OLED_Init();
 
     while (1) {
+        MOTOR_unLock();
+        rt_thread_delay(10000);
+        MOTOR_Lock();
+        rt_thread_delay(10000);
 
         if (HAL_GPIO_ReadPin(BUZZKey_GPIO_Port, BUZZKey_Pin)) {
             KEYS_BellKey_Press();

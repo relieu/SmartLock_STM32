@@ -45,6 +45,7 @@ extern "C" {
 #include "buzz.h"
 #include "fingerprint.h"
 #include "flash.h"
+#include "motor.h"
 
 #include "rtthread.h"
 /* USER CODE END Includes */
