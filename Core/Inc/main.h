@@ -80,10 +80,16 @@ void Error_Handler(void);
 #define LED_GREEN_GPIO_Port GPIOB
 #define LED_BLUE_Pin GPIO_PIN_1
 #define LED_BLUE_GPIO_Port GPIOB
+#define MOTOR_A_Pin GPIO_PIN_12
+#define MOTOR_A_GPIO_Port GPIOB
+#define MOTOR_B_Pin GPIO_PIN_13
+#define MOTOR_B_GPIO_Port GPIOB
+#define MOTOR_C_Pin GPIO_PIN_14
+#define MOTOR_C_GPIO_Port GPIOB
+#define MOTOR_D_Pin GPIO_PIN_15
+#define MOTOR_D_GPIO_Port GPIOB
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
-#define FP_INPUT_Pin GPIO_PIN_9
-#define FP_INPUT_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define TRUE 1
