@@ -1,0 +1,7 @@
+#ifndef SMARTLOCK_STM32_THREADS_H
+#define SMARTLOCK_STM32_THREADS_H
+
+#include "main.h"
+
+
+#endif //SMARTLOCK_STM32_THREADS_H

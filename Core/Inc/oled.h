@@ -57,6 +57,26 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t size)
 void OLED_ShowString(uint8_t x, uint8_t y, const char *pStr, uint8_t size);
 
 //显示中文
-void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t number);
+void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t fontNo);
+
+//显示位图
+void OLED_showBMP(uint8_t x, uint8_t y, uint8_t bmpNo);
+
+//--------------------功能--------------------
+
+//显示时间
+void OLED_showTime(void);
+
+//显示信息-开锁中
+void OLED_showInfo_unLocking(void);
+
+//显示信息-锁定中
+void OLED_showInfo_Locking(void);
+
+//显示信息-开锁成功
+void OLED_showInfo_unLock(void);
+
+//显示信息-锁定完成
+void OLED_showInfo_Lock(void);
 
 #endif //SMARTLOCK_STM32_OLED_H

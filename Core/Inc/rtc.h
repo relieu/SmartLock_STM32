@@ -36,6 +36,12 @@ extern RTC_HandleTypeDef hrtc;
 
 /* USER CODE BEGIN Private defines */
 
+//打印时间
+void RTC_printTime(RTC_TimeTypeDef time, RTC_DateTypeDef date);
+
+//设置日期(备份)
+void RTC_setDate(RTC_DateTypeDef date);
+
 /* USER CODE END Private defines */
 
 void MX_RTC_Init(void);

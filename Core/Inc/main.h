@@ -46,6 +46,7 @@ extern "C" {
 #include "fingerprint.h"
 #include "flash.h"
 #include "motor.h"
+#include "threads.h"
 
 #include "rtthread.h"
 /* USER CODE END Includes */
@@ -89,6 +90,22 @@ void Error_Handler(void);
 #define MOTOR_C_GPIO_Port GPIOB
 #define MOTOR_D_Pin GPIO_PIN_15
 #define MOTOR_D_GPIO_Port GPIOB
+#define KEYS_COL3_Pin GPIO_PIN_6
+#define KEYS_COL3_GPIO_Port GPIOC
+#define KEYS_COL4_Pin GPIO_PIN_7
+#define KEYS_COL4_GPIO_Port GPIOC
+#define KEYS_ROW1_Pin GPIO_PIN_8
+#define KEYS_ROW1_GPIO_Port GPIOC
+#define KEYS_ROW2_Pin GPIO_PIN_9
+#define KEYS_ROW2_GPIO_Port GPIOC
+#define KEYS_ROW3_Pin GPIO_PIN_10
+#define KEYS_ROW3_GPIO_Port GPIOC
+#define KEYS_ROW4_Pin GPIO_PIN_11
+#define KEYS_ROW4_GPIO_Port GPIOC
+#define KEYS_COL2_Pin GPIO_PIN_12
+#define KEYS_COL2_GPIO_Port GPIOC
+#define KEYS_COL1_Pin GPIO_PIN_2
+#define KEYS_COL1_GPIO_Port GPIOD
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
 

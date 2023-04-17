@@ -31,16 +31,15 @@ void MX_RTC_Init(void)
 {
 
   /* USER CODE BEGIN RTC_Init 0 */
-    RTC_TimeTypeDef time;   //时间结构体参�?
-    RTC_DateTypeDef date;   //日期结构体参�?
+    RTC_TimeTypeDef time;
+    RTC_DateTypeDef date;
   /* USER CODE END RTC_Init 0 */
 
   RTC_TimeTypeDef sTime = {0};
   RTC_DateTypeDef DateToUpdate = {0};
 
   /* USER CODE BEGIN RTC_Init 1 */
-    __HAL_RCC_BKP_CLK_ENABLE();       //�?启后备区域时�?
-    __HAL_RCC_PWR_CLK_ENABLE();       //�?启时钟电�?
+
   /* USER CODE END RTC_Init 1 */
 
   /** Initialize RTC Only
@@ -59,17 +58,17 @@ void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x22;
-  sTime.Minutes = 0x49;
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
   sTime.Seconds = 0x0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_FRIDAY;
+  DateToUpdate.WeekDay = RTC_WEEKDAY_SUNDAY;
   DateToUpdate.Month = RTC_MONTH_APRIL;
-  DateToUpdate.Date = 0x7;
+  DateToUpdate.Date = 0x16;
   DateToUpdate.Year = 0x23;
 
   if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
@@ -77,9 +76,13 @@ void MX_RTC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN RTC_Init 2 */
-        __HAL_RTC_SECOND_ENABLE_IT(&hrtc, RTC_IT_SEC);     //�?启RTC时钟秒中�?
-        date = DateToUpdate;  //把日期数据拷贝到自己定义的date�?
-        HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, 0x5051); //向指定的后备区域寄存器写入数�?
+        __HAL_RTC_SECOND_ENABLE_IT(&hrtc, RTC_IT_SEC);
+        date = DateToUpdate;
+
+        //使能BKP写入操作
+        __HAL_RCC_BKP_CLK_ENABLE();
+        __HAL_RCC_PWR_CLK_ENABLE();
+        HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, 0x5051);
         HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR2, (uint16_t) date.Year);
         HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR3, (uint16_t) date.Month);
         HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR4, (uint16_t) date.Date);
@@ -94,7 +97,7 @@ void MX_RTC_Init(void)
         if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN) != HAL_OK) {
             Error_Handler();
         }
-        __HAL_RTC_SECOND_ENABLE_IT(&hrtc, RTC_IT_SEC);     //�?启RTC秒中�?
+        __HAL_RTC_SECOND_ENABLE_IT(&hrtc, RTC_IT_SEC);
     }
   /* USER CODE END RTC_Init 2 */
 
@@ -150,5 +153,15 @@ void RTC_printTime(RTC_TimeTypeDef time, RTC_DateTypeDef date) {
     rt_kprintf("%02d:%02d:%02d\r\n", time.Hours, time.Minutes, time.Seconds);
 
     rt_kprintf("\r\n");
+}
+
+void RTC_setDate(RTC_DateTypeDef date) {
+    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR2, (uint16_t) date.Year);
+    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR3, (uint16_t) date.Month);
+    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR4, (uint16_t) date.Date);
+    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR5, (uint16_t) date.WeekDay);
+    if (HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN) != HAL_OK) {
+        Error_Handler();
+    }
 }
 /* USER CODE END 1 */

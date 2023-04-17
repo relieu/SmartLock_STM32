@@ -64,6 +64,7 @@ void OLED_Init(void) {
     OLED_Write_Cmd(0xAF);    // 打开OLED -- turn on oled panel
 
     OLED_Clear();
+    OLED_Display_Update();
 }
 
 //开启显示
@@ -172,7 +173,7 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t size)
     //分解数字
     for (int i = 0; i < len; i++) {
         if (num) nums[len - i - 1] = num % 10 + '0';
-        else nums[len - i - 1] = ' ';
+        else nums[len - i - 1] = '0';
         num /= 10;
     }
 
@@ -193,8 +194,178 @@ void OLED_ShowString(uint8_t x, uint8_t y, const char *pStr, uint8_t size) {
 //    OLED_Display_Update();//更新显示
 }
 
-//显示中文
-void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t number)
-{
-    //TODO 中文界面
+//显示中文16x16
+void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t fontNo) {
+    uint8_t byte;
+
+    for (uint8_t i = 0; i < 2; ++i) {
+
+        for (uint8_t j = 0; j < 16; ++j) {
+
+            byte = Chinese_16x16[fontNo * 2 + i][j];
+
+            for (uint8_t k = 0; k < 8; ++k) {
+                if (byte & 0x80) OLED_DrawPoint(x, y);
+                else OLED_ClearPoint(x, y);
+                byte <<= 1;
+                x++;
+            }
+            x -= 8;
+            y++;
+        }
+        x += 8;
+        y -= 16;
+    }
+}
+
+//显示位图
+void OLED_showBMP(uint8_t x, uint8_t y, uint8_t bmpNo) {
+    uint8_t byte;
+
+    for (uint8_t i = 0; i < 4; ++i) {
+
+        for (uint8_t j = 0; j < 32; ++j) {
+
+            byte = BMP_32x32[bmpNo * 4 + i][j];
+
+            for (uint8_t k = 0; k < 8; ++k) {
+                if (byte & 0x80) OLED_DrawPoint(x, y);
+                else OLED_ClearPoint(x, y);
+                byte <<= 1;
+                x++;
+            }
+            x -= 8;
+            y++;
+        }
+        x += 8;
+        y -= 32;
+    }
+}
+
+void OLED_showTime(void) {
+    RTC_TimeTypeDef time;
+    RTC_DateTypeDef date;
+
+    HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+
+    char weekday[4];
+
+    switch (date.WeekDay) {
+        case RTC_WEEKDAY_MONDAY:
+            weekday[0] = 'M';
+            weekday[1] = 'o';
+            weekday[2] = 'n';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_TUESDAY:
+            weekday[0] = 'T';
+            weekday[1] = 'u';
+            weekday[2] = 'e';
+            weekday[3] = 's';
+            break;
+        case RTC_WEEKDAY_WEDNESDAY:
+            weekday[0] = 'W';
+            weekday[1] = 'e';
+            weekday[2] = 'd';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_THURSDAY:
+            weekday[0] = 'T';
+            weekday[1] = 'h';
+            weekday[2] = 'u';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_FRIDAY:
+            weekday[0] = 'F';
+            weekday[1] = 'r';
+            weekday[2] = 'i';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_SATURDAY:
+            weekday[0] = 'S';
+            weekday[1] = 'a';
+            weekday[2] = 't';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_SUNDAY:
+            weekday[0] = 'S';
+            weekday[1] = 'u';
+            weekday[2] = 'n';
+            weekday[3] = ' ';
+            break;
+        default:
+            break;
+    }
+
+    OLED_ShowString(100, 8, weekday, 16);
+    OLED_ShowNum(68, 30, date.Year + 2000, 4, 12);
+    OLED_ShowChar(92, 30, '-', 12);
+    OLED_ShowNum(98, 30, date.Month, 2, 12);
+    OLED_ShowChar(110, 30, '-', 12);
+    OLED_ShowNum(116, 30, date.Date, 2, 12);
+
+    OLED_showBMP(16, 32, 0);
+
+    while (1) {
+        HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+        HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+
+        OLED_ShowNum(0, 0, time.Hours, 2, 24);
+        OLED_ShowChar(24, 0, ':', 24);
+        OLED_ShowNum(36, 0, time.Minutes, 2, 24);
+        OLED_ShowChar(60, 0, ':', 24);
+        OLED_ShowNum(72, 0, time.Seconds, 2, 24);
+
+        OLED_Display_Update();
+        rt_thread_delay(1000);
+    }
+}
+
+//显示信息-开锁
+void OLED_showInfo_unLocking(void) {
+    OLED_ShowChinese(32,16, 0);
+    OLED_ShowChinese(48,16, 1);
+    OLED_ShowChinese(64,16, 2);
+
+    OLED_ShowChar(80, 16, '.', 12);
+    OLED_ShowChar(86, 16, '.', 12);
+    OLED_ShowChar(92, 16, '.', 12);
+
+    OLED_Display_Update();
+}
+
+//显示信息-锁定
+void OLED_showInfo_Locking(void) {
+    OLED_ShowChinese(32,16, 1);
+    OLED_ShowChinese(48,16, 14);
+    OLED_ShowChinese(64,16, 2);
+
+    OLED_ShowChar(80, 16, '.', 12);
+    OLED_ShowChar(86, 16, '.', 12);
+    OLED_ShowChar(92, 16, '.', 12);
+
+    OLED_Display_Update();
+}
+
+//显示信息-开锁成功
+void OLED_showInfo_unLock(void) {
+    OLED_ShowChinese(40,10, 4);
+    OLED_ShowChinese(56,10, 3);
+    OLED_ShowChinese(72,10, 1);
+
+    OLED_showBMP(48, 30, 1);
+
+    OLED_Display_Update();
+}
+
+//显示信息-锁定完成
+void OLED_showInfo_Lock(void) {
+    OLED_ShowChinese(40,10, 4);
+    OLED_ShowChinese(56,10, 1);
+    OLED_ShowChinese(72,10, 14);
+
+    OLED_showBMP(48, 30, 0);
+
+    OLED_Display_Update();
 }
