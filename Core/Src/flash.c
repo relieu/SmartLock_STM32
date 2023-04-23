@@ -71,17 +71,17 @@ void FLASH_WriteStatusReg(uint8_t RegNo, uint8_t Data) {
 
 void FLASH_Write_Enable(void) {
     uint8_t cmd = W25X_WriteEnable;
-//    FLASH_SPI_Select();
+    FLASH_SPI_Select();
     HAL_SPI_Transmit(&hspi1, &cmd, 1, 1000);
-//    FLASH_SPI_deSelect();
+    FLASH_SPI_deSelect();
 }
 
 //写禁止
 void FLASH_Write_Disable(void) {
     uint8_t cmd = W25X_WriteDisable;
-//    FLASH_SPI_Select();
+    FLASH_SPI_Select();
     HAL_SPI_Transmit(&hspi1, &cmd, 1, 1000);
-//    FLASH_SPI_deSelect();
+    FLASH_SPI_deSelect();
 }
 
 //读取数据
@@ -94,9 +94,9 @@ void FLASH_Read(uint8_t *pBuffer, uint32_t ReadAddr, uint16_t NumByteToRead) {
 
     FLASH_SPI_Select();
     HAL_SPI_Transmit(&hspi1, cmd, 4, 1000);
-//    if (HAL_SPI_Receive(&hspi1, pBuffer, NumByteToRead, 1000) != HAL_OK) {
-//        Error_Handler();
-//    }
+    if (HAL_SPI_Receive(&hspi1, pBuffer, NumByteToRead, 1000) != HAL_OK) {
+        rt_kprintf("error");
+    }
     FLASH_SPI_deSelect();
 }
 
@@ -117,15 +117,19 @@ void FLASH_Write_Page(uint8_t *pBuffer, uint16_t SectorNo, uint8_t page, uint16_
         NumByteToWrite = 256;
     }
 
-    FLASH_SPI_Select();
     FLASH_Write_Enable();
+    FLASH_Wait_Busy(); //等待写入完成
+
+    FLASH_SPI_Select();
+
 
     HAL_SPI_Transmit(&hspi1, cmd, 4, 1000);
     HAL_SPI_Transmit(&hspi1, pBuffer, NumByteToWrite, 1000);
 
-    FLASH_Write_Disable();
     FLASH_SPI_deSelect();
+    FLASH_Wait_Busy(); //等待写入完成
 
+    FLASH_Write_Disable();
     FLASH_Wait_Busy(); //等待写入完成
 }
 
@@ -141,11 +145,43 @@ void FLASH_Erase_Block(uint16_t BlockNo) {
 
 //扇区擦除4kb
 void FLASH_Erase_Sector(uint16_t BlockNo, uint16_t SectorNo) {
-    //TODO
+    uint32_t EraseAddr = BlockNo * 4000 * 16 + SectorNo * 4000;
+
+    uint8_t cmd[4] = {0};
+    cmd[0] = W25X_SectorErase;
+    cmd[1] = ((uint8_t) (EraseAddr >> 16));
+    cmd[2] = ((uint8_t) (EraseAddr >> 8));
+    cmd[3] = ((uint8_t) EraseAddr);
+
+    FLASH_Write_Enable();
+    FLASH_Wait_Busy(); //等待写入完成
+
+    FLASH_SPI_Select();
+
+    HAL_SPI_Transmit(&hspi1, cmd, 4, 1000);
+
+    FLASH_SPI_deSelect();
+    FLASH_Wait_Busy(); //等待写入完成
+
+    FLASH_Write_Enable();
+    FLASH_Wait_Busy(); //等待写入完成
 }
 
 //等待操作
 void FLASH_Wait_Busy(void) {
     while ((FLASH_ReadStatusReg(1) & 0x01) == 0x01)
         rt_thread_delay(100);
+}
+
+//读取数据
+void FLASH_readData(uint8_t *pBuffer, uint8_t size) {
+    FLASH_Read(pBuffer, 0, size);
+}
+
+//写入数据
+void FLASH_writeData(uint8_t *pBuffer, uint8_t size) {
+
+    FLASH_Erase_Sector(0, 0);
+
+    FLASH_Write_Page(pBuffer, 0, 0, size);
 }

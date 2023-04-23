@@ -268,5 +268,11 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+extern rt_sem_t uart2_sem;
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart == &huart2) {
+        rt_sem_release(uart2_sem);
+    }
+}
 /* USER CODE END 1 */

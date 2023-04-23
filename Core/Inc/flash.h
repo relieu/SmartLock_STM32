@@ -76,4 +76,12 @@ void FLASH_PowerDown(void);
 //唤醒
 void FLASH_WAKEUP(void);
 
+//==========综合==========
+
+//读取数据
+void FLASH_readData(uint8_t *pBuffer, uint8_t size);
+
+//写入数据
+void FLASH_writeData(uint8_t *pBuffer, uint8_t size);
+
 #endif //SMARTLOCK_STM32_FLASH_H

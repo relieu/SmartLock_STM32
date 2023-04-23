@@ -3,6 +3,8 @@
 
 uint8_t FP_Receive_Buffer[32] = {0};
 
+extern rt_sem_t uart2_sem;
+
 //发送命令
 void FP_Send_Head(void) {
     uint8_t data[6];
@@ -64,20 +66,15 @@ void FP_Send_Word(uint16_t word) {
 }
 
 //接收返回信息
-uint8_t FP_Receive(uint8_t size) {
+void FP_Receive(uint8_t size) {
     HAL_UART_Receive_IT(&huart2, FP_Receive_Buffer, size);
-    return FP_Receive_Buffer[9];
-}
-
-//处理接收数据
-void FP_Receive_Data(uint8_t *pData, uint8_t pos, uint8_t size) {
-    for (int i = 0; i < size; ++i) {
-        *pData = FP_Receive_Buffer[pos + i];
-    }
 }
 
 //提取指纹图像
 void FP_getImage(void) {
+    //开启接收中断
+    FP_Receive(12);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -88,10 +85,18 @@ void FP_getImage(void) {
 
     sumCheck = FP_CMD_FLAG + 0x03 + 0x01;
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_kprintf("1");
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
+    rt_kprintf("2");
 }
 
 //生成指纹特征并存到缓存1、2
 void FP_genChara(uint8_t bufferNo) {
+    //开启接收中断
+    FP_Receive(12);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -105,10 +110,16 @@ void FP_genChara(uint8_t bufferNo) {
     sumCheck = FP_CMD_FLAG + 0x04 + 0x02
                + FP_2ByteSum(bufferNo);
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //根据两次指纹输入生成模板
 void FP_genModel(void) {
+    //开启接收中断
+    FP_Receive(12);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -119,10 +130,16 @@ void FP_genModel(void) {
 
     sumCheck = FP_CMD_FLAG + 0x03 + 0x05;
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //存储指纹模板
 void FP_storeModel(uint16_t pageNo) {
+    //开启接收中断
+    FP_Receive(12);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -137,10 +154,37 @@ void FP_storeModel(uint16_t pageNo) {
     sumCheck = FP_CMD_FLAG + 0x06 + 0x06 + 0x01
                + FP_2ByteSum(pageNo);
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
+}
+
+//自动提取指纹
+void FP_autoStore(void) {
+    //开启接收中断
+    FP_Receive(14);
+
+    uint16_t sumCheck = 0;
+
+    FP_Send_Head();
+
+    FP_Send_Flag(FP_CMD_FLAG);
+    FP_Send_Length(0x03);
+    FP_Send_Cmd(0x10);
+
+    sumCheck = FP_CMD_FLAG + 0x03 + 0x10;
+    FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_kprintf("a\n");
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //指纹搜索
 void FP_Search(uint16_t startPage, uint16_t pageNum) {
+    //开启接收中断
+    FP_Receive(16);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -156,10 +200,16 @@ void FP_Search(uint16_t startPage, uint16_t pageNum) {
     sumCheck = FP_CMD_FLAG + 0x08 + 0x04 + 0x01
                + FP_2ByteSum(startPage + pageNum);
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //快速搜索
 void FP_fastSearch(uint16_t startPage, uint16_t pageNum) {
+    //开启接收中断
+    FP_Receive(16);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -175,6 +225,9 @@ void FP_fastSearch(uint16_t startPage, uint16_t pageNum) {
     sumCheck = FP_CMD_FLAG + 0x08 + 0x1B + 0x01
                + FP_2ByteSum(startPage + pageNum);
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //计算2个字节和
@@ -187,6 +240,9 @@ uint16_t FP_2ByteSum(uint16_t word) {
 
 //获取指纹模板库大小
 void FP_getModelNum(void) {
+    //开启接收中断
+    FP_Receive(14);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -197,10 +253,16 @@ void FP_getModelNum(void) {
 
     sumCheck = FP_CMD_FLAG + 0x03 + 0x1D;
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //删除模板
 void FP_delModel(uint16_t startPage, uint16_t pageNum) {
+    //开启接收中断
+    FP_Receive(12);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -215,10 +277,16 @@ void FP_delModel(uint16_t startPage, uint16_t pageNum) {
     sumCheck = FP_CMD_FLAG + 0x07 + 0x0C
                + FP_2ByteSum(startPage + pageNum);
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //删除所有模板
 void FP_Clear(void) {
+    //开启接收中断
+    FP_Receive(12);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -229,10 +297,16 @@ void FP_Clear(void) {
 
     sumCheck = FP_CMD_FLAG + 0x03 + 0x0D;
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }
 
 //获取系统信息
 void FP_getInfo(void) {
+    //开启接收中断
+    FP_Receive(28);
+
     uint16_t sumCheck = 0;
 
     FP_Send_Head();
@@ -243,4 +317,7 @@ void FP_getInfo(void) {
 
     sumCheck = FP_CMD_FLAG + 0x03 + 0x0F;
     FP_Send_Check(sumCheck);
+
+    //等待应答
+    rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
 }

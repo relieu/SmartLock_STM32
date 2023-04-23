@@ -112,6 +112,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define TRUE 1
 #define FALSE 0
+#define FP_OK 0x00;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

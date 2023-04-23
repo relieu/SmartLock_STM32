@@ -33,10 +33,7 @@ void FP_Send_Data(uint8_t data);
 void FP_Send_Word(uint16_t word);
 
 //接收返回信息
-uint8_t FP_Receive(uint8_t size);
-
-//处理接收数据
-void FP_Receive_Data(uint8_t *pData, uint8_t pos, uint8_t size);
+void FP_Receive(uint8_t size);
 
 //==========指令控制==========
 
@@ -55,6 +52,9 @@ void FP_genModel(void);
 
 //存储指纹模板
 void FP_storeModel(uint16_t pageNo);
+
+//自动提取指纹
+void FP_autoStore(void);
 
 /*
  * 指纹比对

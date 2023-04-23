@@ -64,8 +64,8 @@ void OLED_showBMP(uint8_t x, uint8_t y, uint8_t bmpNo);
 
 //--------------------功能--------------------
 
-//显示时间
-void OLED_showTime(void);
+//显示主界面
+void OLED_showMenu_Main(void);
 
 //显示信息-开锁中
 void OLED_showInfo_unLocking(void);
@@ -78,5 +78,40 @@ void OLED_showInfo_unLock(void);
 
 //显示信息-锁定完成
 void OLED_showInfo_Lock(void);
+
+//显示密码输入
+void OLED_showMenu_Input();
+
+//显示设置界面页1
+void OLED_showPage_Settings1(void);
+
+//显示设置界面页2
+void OLED_showPage_Settings2(void);
+
+//显示设置页面底部
+void OLED_showInfo_SettingsFooter(uint8_t page);
+
+//密码错误
+void OLED_showInfo_PWError(void);
+
+//显示密码正确
+void OLED_showInfo_PWOK(void);
+
+//进入设置页面
+void OLED_showMenu_Settings(void);
+
+//修改密码界面
+void OLED_showMenu_resetPW(void);
+
+//显示修改密码成功
+void OLED_showInfo_resetOk(void);
+
+//进入修改时间界面
+void OLED_showMenu_resetTime(void);
+
+//--------------------OLED综合--------------------
+
+//OLED模块 汇总
+void OLED_Overall(void);
 
 #endif //SMARTLOCK_STM32_OLED_H
