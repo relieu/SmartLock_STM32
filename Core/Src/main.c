@@ -65,6 +65,7 @@ extern rt_thread_t oled_thread;
 extern rt_thread_t finger_thread;
 
 extern rt_sem_t uart2_sem;
+extern rt_sem_t finger_sem;
 
 extern rt_event_t input_event;
 
@@ -72,8 +73,7 @@ int main() {
     //初始化
     OLED_Init();
 
-//    uint8_t password[10] = "123456";
-//    FLASH_writeData(password, 6);
+    OLED_showInfo_Boot();
 
     //线程创建
     key_thread = rt_thread_create(
@@ -81,14 +81,14 @@ int main() {
             key_thread_entry,
             RT_NULL,
             512,
-            2,
+            1,
             500);
 
     oled_thread = rt_thread_create(
             "OledThread",
             oled_thread_entry,
             RT_NULL,
-            1024,
+            2048,
             3,
             500);
 
@@ -96,7 +96,7 @@ int main() {
             "FPThread",
             finger_thread_entry,
             RT_NULL,
-            512,
+            256,
             2,
             500);
 
@@ -104,6 +104,11 @@ int main() {
     uart2_sem = rt_sem_create(
             "UART2Sem",
             0,
+            RT_IPC_FLAG_FIFO);
+
+    finger_sem = rt_sem_create(
+            "FingerSem",
+            1,
             RT_IPC_FLAG_FIFO);
 
     input_event = rt_event_create(

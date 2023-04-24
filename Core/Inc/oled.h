@@ -109,6 +109,39 @@ void OLED_showInfo_resetOk(void);
 //进入修改时间界面
 void OLED_showMenu_resetTime(void);
 
+//检测到指纹
+void OLED_showInfo_FPDetected(void);
+
+//指纹检测失败
+void OLED_showInfo_FPError(void);
+
+//指纹检测成功
+void OLED_showInfo_FPOk(void);
+
+//添加指纹菜单
+void OLED_showInfo_addFP(void);
+
+//添加指纹失败
+void OLED_showInfo_addError(void);
+
+//添加指纹成功
+void OLED_showInfo_addOK(void);
+
+//显示指纹删除菜单
+void OLED_showMenu_delFP(void);
+
+//删除失败
+void OLED_showMenu_delError(void);
+
+//删除成功
+void OLED_showInfo_delOK(void);
+
+//显示系统信息
+void OLED_showInfo_Overall(void);
+
+//显示上电欢迎界面
+void OLED_showInfo_Boot(void);
+
 //--------------------OLED综合--------------------
 
 //OLED模块 汇总

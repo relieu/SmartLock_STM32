@@ -87,9 +87,7 @@ void FP_getImage(void) {
     FP_Send_Check(sumCheck);
 
     //等待应答
-    rt_kprintf("1");
     rt_sem_take(uart2_sem, RT_WAITING_FOREVER);
-    rt_kprintf("2");
 }
 
 //生成指纹特征并存到缓存1、2

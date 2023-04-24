@@ -4,7 +4,10 @@
 //显存
 uint8_t OLED_GRAM[128][8];
 
+extern uint8_t FP_Receive_Buffer[];
+
 extern rt_event_t input_event;
+extern rt_sem_t finger_sem;
 
 //发送指令
 void OLED_Write_Cmd(uint8_t cmd) {
@@ -594,10 +597,13 @@ void OLED_showMenu_Input() {
                 }
             }
 
+            //验证成功
             if (Flag_errorPW != 1) {
-                rt_event_send(input_event, 0x40000000);
+                rt_event_send(input_event, 0x48000000);
                 OLED_Clear();
                 OLED_showInfo_PWOK();
+                //暂停指纹检测
+                rt_sem_take(finger_sem, RT_WAITING_FOREVER);
                 return;
             }
         }
@@ -651,7 +657,7 @@ void OLED_showPage_Settings2(void) {
 
     //"5. 显示信息"
     OLED_ShowString(24, 16, "5. ", 16);
-    OLED_ShowChinese(48, 16, 22);
+    OLED_ShowChinese(48, 16, 55);
     OLED_ShowChinese(64, 16, 23);
     OLED_ShowChinese(80, 16, 24);
     OLED_ShowChinese(96, 16, 25);
@@ -688,6 +694,7 @@ void OLED_showInfo_PWError(void) {
     OLED_ShowChinese(72, 32, 34);
 
     OLED_Display_Update();
+    BUZZ_Beep(3);
 
     rt_event_send(input_event, 0x80000000);
     rt_thread_delay(1000);
@@ -775,29 +782,43 @@ void OLED_showMenu_Settings(void) {
             switch (state) {
                 case 0:
                     //录入指纹
-                    rt_kprintf("0");
+                    OLED_showInfo_addFP();
+                    OLED_showPage_Settings1();
+                    OLED_ShowChinese(0, (state % 3) * 16, 9);
+                    OLED_Display_Update();
                     break;
                 case 1:
                     //删除指纹
-                    rt_kprintf("1");
+                    OLED_showMenu_delFP();
+                    OLED_showPage_Settings1();
+                    OLED_ShowChinese(0, (state % 3) * 16, 9);
+                    OLED_Display_Update();
                     break;
                 case 2:
                     //修改密码
                     OLED_showMenu_resetPW();
+                    OLED_showPage_Settings1();
+                    OLED_ShowChinese(0, (state % 3) * 16, 9);
+                    OLED_Display_Update();
                     break;
                 case 3:
                     //修改时间
-                    rt_kprintf("3");
+                    OLED_showMenu_resetTime();
+                    OLED_showPage_Settings2();
+                    OLED_ShowChinese(0, (state % 3) * 16, 9);
+                    OLED_Display_Update();
                     break;
                 case 4:
                     //查看信息
-                    rt_kprintf("4");
+                    OLED_showInfo_Overall();
+                    OLED_showPage_Settings2();
+                    OLED_ShowChinese(0, (state % 3) * 16, 9);
+                    OLED_Display_Update();
                     break;
                 default:
                     break;
             }
         }
-
     }
 }
 
@@ -996,15 +1017,978 @@ void OLED_showInfo_resetOk(void) {
     OLED_ShowChinese(64, 10, 38);
     OLED_ShowChinese(80, 10, 39);
 
-    //"请输入新密码"
-    OLED_ShowChinese(16, 26, 32);
-    OLED_ShowChinese(32, 26, 40);
-    OLED_ShowChinese(48, 26, 41);
-    OLED_ShowChinese(64, 26, 37);
-    OLED_ShowChinese(80, 26, 6);
-    OLED_ShowChinese(96, 26, 7);
+    OLED_Display_Update();
+}
+
+//进入修改时间界面
+void OLED_showMenu_resetTime(void) {
+    RTC_TimeTypeDef time;
+    RTC_DateTypeDef date;
+
+    HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+
+    uint8_t select = 0;
+    uint8_t Flag_reset = 0;
+
+    char weekday[4];
+
+    switch (date.WeekDay) {
+        case RTC_WEEKDAY_MONDAY:
+            weekday[0] = 'M';
+            weekday[1] = 'o';
+            weekday[2] = 'n';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_TUESDAY:
+            weekday[0] = 'T';
+            weekday[1] = 'u';
+            weekday[2] = 'e';
+            weekday[3] = 's';
+            break;
+        case RTC_WEEKDAY_WEDNESDAY:
+            weekday[0] = 'W';
+            weekday[1] = 'e';
+            weekday[2] = 'd';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_THURSDAY:
+            weekday[0] = 'T';
+            weekday[1] = 'h';
+            weekday[2] = 'u';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_FRIDAY:
+            weekday[0] = 'F';
+            weekday[1] = 'r';
+            weekday[2] = 'i';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_SATURDAY:
+            weekday[0] = 'S';
+            weekday[1] = 'a';
+            weekday[2] = 't';
+            weekday[3] = ' ';
+            break;
+        case RTC_WEEKDAY_SUNDAY:
+            weekday[0] = 'S';
+            weekday[1] = 'u';
+            weekday[2] = 'n';
+            weekday[3] = ' ';
+            break;
+        default:
+            break;
+    }
+
+    OLED_Clear();
+
+    OLED_ShowString(100, 8, weekday, 16);
+    OLED_ShowNum(68, 30, date.Year + 2000, 4, 12);
+    OLED_ShowChar(92, 30, '-', 12);
+    OLED_ShowNum(98, 30, date.Month, 2, 12);
+    OLED_ShowChar(110, 30, '-', 12);
+    OLED_ShowNum(116, 30, date.Date, 2, 12);
+
+    OLED_ShowNum(0, 0, time.Hours, 2, 24);
+    OLED_ShowChar(24, 0, ':', 24);
+    OLED_ShowNum(36, 0, time.Minutes, 2, 24);
+    OLED_ShowChar(60, 0, ':', 24);
+    OLED_ShowNum(72, 0, time.Seconds, 2, 24);
+
+    //← OK → 确认
+    OLED_ShowChinese(0, 48, 42);
+    OLED_ShowString(32, 48, "OK", 16);
+    OLED_ShowChinese(64, 48, 9);
+    OLED_ShowChinese(92, 48, 26);
+    OLED_ShowChinese(108, 48, 27);
 
     OLED_Display_Update();
+
+    while (1) {
+
+        switch (select) {
+            case 0:
+                OLED_Fill(0, 0, 24, 24, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowNum(0, 0, time.Hours, 2, 24);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            case 1:
+                OLED_Fill(36, 0, 60, 24, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowNum(36, 0, time.Minutes, 2, 24);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            case 2:
+                OLED_Fill(72, 0, 96, 24, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowNum(72, 0, time.Seconds, 2, 24);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            case 3:
+                OLED_Fill(100, 8, 128, 24, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowString(100, 8, weekday, 16);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            case 4:
+                OLED_Fill(68, 30, 92, 42, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowNum(68, 30, date.Year + 2000, 4, 12);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            case 5:
+                OLED_Fill(98, 30, 110, 42, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowNum(98, 30, date.Month, 2, 12);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            case 6:
+                OLED_Fill(116, 30, 128, 42, FALSE);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                OLED_ShowNum(116, 30, date.Date, 2, 12);
+                OLED_Display_Update();
+                rt_thread_delay(300);
+                break;
+            default:
+                break;
+        }
+
+        //按下锁定按键A
+        if (rt_event_recv(input_event, 0x00001000,
+                          RT_EVENT_FLAG_OR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            rt_event_send(input_event, 0x80000000);
+            return;
+        }
+
+        //按下'*'键 向上/左
+        if (rt_event_recv(input_event, 0x00000008,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            //选择模式
+            if (Flag_reset == 0) {
+                if (select == 0) select = 7;
+                select--;
+            } else {
+                switch (select) {
+                    case 0:
+                        time.Hours++;
+                        if (time.Hours == 24) time.Hours = 0;
+                        break;
+                    case 1:
+                        time.Minutes++;
+                        if (time.Minutes == 60) time.Minutes = 0;
+                        break;
+                    case 2:
+                        time.Seconds++;
+                        if (time.Seconds == 60) time.Seconds = 0;
+                    case 3:
+                        if (date.WeekDay == RTC_WEEKDAY_SATURDAY) date.WeekDay = RTC_WEEKDAY_SUNDAY;
+                        else date.WeekDay++;
+                        switch (date.WeekDay) {
+                            case RTC_WEEKDAY_MONDAY:
+                                weekday[0] = 'M';
+                                weekday[1] = 'o';
+                                weekday[2] = 'n';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_TUESDAY:
+                                weekday[0] = 'T';
+                                weekday[1] = 'u';
+                                weekday[2] = 'e';
+                                weekday[3] = 's';
+                                break;
+                            case RTC_WEEKDAY_WEDNESDAY:
+                                weekday[0] = 'W';
+                                weekday[1] = 'e';
+                                weekday[2] = 'd';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_THURSDAY:
+                                weekday[0] = 'T';
+                                weekday[1] = 'h';
+                                weekday[2] = 'u';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_FRIDAY:
+                                weekday[0] = 'F';
+                                weekday[1] = 'r';
+                                weekday[2] = 'i';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_SATURDAY:
+                                weekday[0] = 'S';
+                                weekday[1] = 'a';
+                                weekday[2] = 't';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_SUNDAY:
+                                weekday[0] = 'S';
+                                weekday[1] = 'u';
+                                weekday[2] = 'n';
+                                weekday[3] = ' ';
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case 4:
+                        date.Year++;
+                        break;
+                    case 5:
+                        if (date.Month == RTC_MONTH_DECEMBER) date.Month = RTC_MONTH_JANUARY;
+                        else date.Month++;
+                        break;
+                    case 6:
+                        if (date.Date == 31) date.Date = 0;
+                        else date.Date++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        //按下'#'键 向下/右
+        if (rt_event_recv(input_event, 0x00000800,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            //选择模式
+            if (Flag_reset == 0) {
+                select++;
+                if (select == 7) select = 0;
+            } else {
+                switch (select) {
+                    case 0:
+                        if (time.Hours == 0) time.Hours = 24;
+                        time.Hours--;
+                        break;
+                    case 1:
+                        if (time.Minutes == 0) time.Minutes = 60;
+                        time.Minutes--;
+                        break;
+                    case 2:
+                        if (time.Seconds == 0) time.Seconds = 60;
+                        time.Seconds--;
+                    case 3:
+                        if (date.WeekDay == RTC_WEEKDAY_SUNDAY) date.WeekDay = RTC_WEEKDAY_SATURDAY;
+                        else date.WeekDay--;
+                        switch (date.WeekDay) {
+                            case RTC_WEEKDAY_MONDAY:
+                                weekday[0] = 'M';
+                                weekday[1] = 'o';
+                                weekday[2] = 'n';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_TUESDAY:
+                                weekday[0] = 'T';
+                                weekday[1] = 'u';
+                                weekday[2] = 'e';
+                                weekday[3] = 's';
+                                break;
+                            case RTC_WEEKDAY_WEDNESDAY:
+                                weekday[0] = 'W';
+                                weekday[1] = 'e';
+                                weekday[2] = 'd';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_THURSDAY:
+                                weekday[0] = 'T';
+                                weekday[1] = 'h';
+                                weekday[2] = 'u';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_FRIDAY:
+                                weekday[0] = 'F';
+                                weekday[1] = 'r';
+                                weekday[2] = 'i';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_SATURDAY:
+                                weekday[0] = 'S';
+                                weekday[1] = 'a';
+                                weekday[2] = 't';
+                                weekday[3] = ' ';
+                                break;
+                            case RTC_WEEKDAY_SUNDAY:
+                                weekday[0] = 'S';
+                                weekday[1] = 'u';
+                                weekday[2] = 'n';
+                                weekday[3] = ' ';
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case 4:
+                        date.Year--;
+                        break;
+                    case 5:
+                        if (date.Month == RTC_MONTH_JANUARY) date.Month = RTC_MONTH_DECEMBER;
+                        else date.Month--;
+                        break;
+                    case 6:
+                        if (date.Date == 0) date.Date = 31;
+                        else date.Date--;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        //按下'0'键 修改/锁定
+        if (rt_event_recv(input_event, 0x00000080,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            if (Flag_reset == 0) {
+                Flag_reset = 1;
+                //上下
+                OLED_ShowChinese(0, 48, 10);
+                OLED_ShowChinese(64, 48, 11);
+            } else {
+                Flag_reset = 0;
+                //左右
+                OLED_ShowChinese(0, 48, 42);
+                OLED_ShowChinese(64, 48, 9);
+            }
+        }
+
+        //确认修改
+        if (rt_event_recv(input_event, 0x00008000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            HAL_RTC_SetTime(&hrtc, &time, FORMAT_BIN);
+            HAL_RTC_SetDate(&hrtc, &date, FORMAT_BIN);
+            RTC_setDate(date);
+
+            OLED_showInfo_resetOk();
+            rt_thread_delay(500);
+            return;
+        }
+    }
+}
+
+//检测到指纹
+void OLED_showInfo_FPDetected(void) {
+    OLED_Clear();
+
+    //"指纹检测中"
+    OLED_ShowChinese(24, 20, 14);
+    OLED_ShowChinese(40, 20, 15);
+    OLED_ShowChinese(56, 20, 43);
+    OLED_ShowChinese(72, 20, 44);
+    OLED_ShowChinese(88, 20, 2);
+
+    OLED_Display_Update();
+
+    rt_thread_delay(100);
+
+    FP_genChara(1);
+    if (FP_Receive_Buffer[9] != 0x00) {
+        OLED_showInfo_FPError();
+        return;
+    }
+
+    FP_Search(0, 100);
+    if (FP_Receive_Buffer[9] != 0x00) {
+        OLED_showInfo_FPError();
+        return;
+    } else {
+        OLED_showInfo_FPOk();
+        rt_thread_delay(500);
+        rt_event_send(input_event, 0x44000000);
+    }
+}
+
+//指纹检测失败
+void OLED_showInfo_FPError(void) {
+    OLED_Clear();
+
+    //"指纹检测失败"
+    OLED_ShowChinese(16, 16, 14);
+    OLED_ShowChinese(32, 16, 15);
+    OLED_ShowChinese(48, 16, 43);
+    OLED_ShowChinese(64, 16, 44);
+    OLED_ShowChinese(80, 16, 30);
+    OLED_ShowChinese(96, 16, 31);
+
+    //"请重试"
+    OLED_ShowChinese(40, 32, 32);
+    OLED_ShowChinese(56, 32, 33);
+    OLED_ShowChinese(72, 32, 34);
+
+    OLED_Display_Update();
+
+    BUZZ_Beep(3);
+
+    rt_thread_delay(500);
+    rt_event_send(input_event, 0x80000000);
+    rt_sem_release(finger_sem);
+}
+
+//指纹检测成功
+void OLED_showInfo_FPOk(void) {
+    OLED_Clear();
+
+    //"指纹检测成功"
+    OLED_ShowChinese(16, 12, 14);
+    OLED_ShowChinese(32, 12, 15);
+    OLED_ShowChinese(48, 12, 43);
+    OLED_ShowChinese(64, 12, 44);
+    OLED_ShowChinese(80, 12, 38);
+    OLED_ShowChinese(96, 12, 39);
+
+    uint16_t id = (FP_Receive_Buffer[10] << 8) + FP_Receive_Buffer[11];
+    uint16_t score = (FP_Receive_Buffer[12] << 8) + FP_Receive_Buffer[13];
+
+    OLED_ShowString(40, 28, "ID:", 16);
+    OLED_ShowNum(64, 28, id, 3, 16);
+
+    OLED_ShowString(40, 44, "Sc:", 16);
+    OLED_ShowNum(64, 44, score, 3, 16);
+
+    OLED_Display_Update();
+}
+
+//添加指纹菜单
+void OLED_showInfo_addFP(void) {
+
+    OLED_Clear();
+
+    //"请输入指纹"
+    OLED_ShowChinese(24, 24, 32);
+    OLED_ShowChinese(40, 24, 40);
+    OLED_ShowChinese(56, 24, 41);
+    OLED_ShowChinese(72, 24, 14);
+    OLED_ShowChinese(88, 24, 15);
+
+    OLED_Display_Update();
+
+    //开启指纹检测
+    rt_sem_release(finger_sem);
+
+    //检测到指纹输入
+    if (rt_event_recv(input_event, 0x00010000,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      10000, RT_NULL)
+        == RT_EOK) { ;
+    } else {
+        OLED_showInfo_addError();
+        return;
+    }
+
+    FP_getImage();
+    if (!FP_Receive_Buffer[9]) { ;
+    } else {
+        OLED_showInfo_addError();
+        return;
+    }
+
+    OLED_Clear();
+
+    //请再次输入指纹
+    OLED_ShowChinese(8, 24, 32);
+    OLED_ShowChinese(24, 24, 45);
+    OLED_ShowChinese(40, 24, 46);
+    OLED_ShowChinese(56, 24, 40);
+    OLED_ShowChinese(72, 24, 41);
+    OLED_ShowChinese(88, 24, 14);
+    OLED_ShowChinese(104, 24, 15);
+
+    OLED_Display_Update();
+
+    rt_thread_delay(2000);
+
+    //开启指纹检测
+    rt_sem_release(finger_sem);
+
+    //检测到指纹输入
+    if (rt_event_recv(input_event, 0x00010000,
+                      RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      10000, RT_NULL)
+        == RT_EOK) { ;
+    } else {
+        OLED_showInfo_addError();
+        return;
+    }
+
+    FP_autoStore();
+    if (!FP_Receive_Buffer[9]) {
+        OLED_showInfo_addOK();
+        return;
+    } else {
+        OLED_showInfo_addError();
+        return;
+    }
+}
+
+//添加指纹失败
+void OLED_showInfo_addError(void) {
+    OLED_Clear();
+
+    //"指纹录入失败"
+    OLED_ShowChinese(16, 16, 14);
+    OLED_ShowChinese(32, 16, 15);
+    OLED_ShowChinese(48, 16, 12);
+    OLED_ShowChinese(64, 16, 13);
+    OLED_ShowChinese(80, 16, 30);
+    OLED_ShowChinese(96, 16, 31);
+
+    //"请重试"
+    OLED_ShowChinese(40, 32, 32);
+    OLED_ShowChinese(56, 32, 33);
+    OLED_ShowChinese(72, 32, 34);
+
+    OLED_Display_Update();
+
+    rt_thread_delay(1000);
+}
+
+//添加指纹成功
+void OLED_showInfo_addOK(void) {
+    OLED_Clear();
+
+    //"指纹录入成功"
+    OLED_ShowChinese(16, 16, 14);
+    OLED_ShowChinese(32, 16, 15);
+    OLED_ShowChinese(48, 16, 12);
+    OLED_ShowChinese(64, 16, 13);
+    OLED_ShowChinese(80, 16, 38);
+    OLED_ShowChinese(96, 16, 39);
+
+    uint16_t id = (FP_Receive_Buffer[10] << 8) + FP_Receive_Buffer[11];
+
+    //"ID:"
+    OLED_ShowString(40, 32, "ID:", 16);
+
+    OLED_ShowNum(64, 32, id, 3, 16);
+
+    OLED_Display_Update();
+
+    rt_thread_delay(1000);
+}
+
+//显示指纹删除菜单
+void OLED_showMenu_delFP(void) {
+    uint8_t inputCnt = 0;
+    uint16_t intID = 0;
+    uint16_t intTem = 0;
+    uint8_t Flag_errorID = 0;
+    uint8_t Flag_allInput = 0;
+
+    OLED_Clear();
+
+    //"请输入删除指纹"
+    OLED_ShowChinese(8, 0, 32);
+    OLED_ShowChinese(24, 0, 40);
+    OLED_ShowChinese(40, 0, 41);
+    OLED_ShowChinese(56, 0, 16);
+    OLED_ShowChinese(72, 0, 17);
+    OLED_ShowChinese(88, 0, 14);
+    OLED_ShowChinese(104, 0, 15);
+
+    //"ID:"
+    OLED_ShowString(40, 16, "ID:", 16);
+    OLED_ShowNum(64, 16, intID, 3, 16);
+
+    //"*: ALL 确定"
+    OLED_ShowString(8, 48, "*: ALL", 16);
+    OLED_ShowChinese(92, 48, 26);
+    OLED_ShowChinese(108, 48, 27);
+
+    OLED_Display_Update();
+
+    while (1) {
+        //超出范围 or 密码错误
+        if (inputCnt > 3 || Flag_errorID) {
+            OLED_showMenu_delError();
+            return;
+        }
+
+        //按下锁定按键A
+        if (rt_event_recv(input_event, 0x00001000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            rt_event_send(input_event, 0x80000000);
+            return;
+        }
+
+        //1
+        if (rt_event_recv(input_event, 0x00000001,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 1;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //2
+        if (rt_event_recv(input_event, 0x00000010,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 2;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //3
+        if (rt_event_recv(input_event, 0x00000100,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 3;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //4
+        if (rt_event_recv(input_event, 0x00000002,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 4;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //5
+        if (rt_event_recv(input_event, 0x00000020,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 5;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //6
+        if (rt_event_recv(input_event, 0x00000200,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 6;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //7
+        if (rt_event_recv(input_event, 0x00000004,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 7;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //8
+        if (rt_event_recv(input_event, 0x00000040,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 8;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //9
+        if (rt_event_recv(input_event, 0x00000400,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 9;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //0
+        if (rt_event_recv(input_event, 0x00000080,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            intTem = 0;
+            if (!Flag_allInput) {
+                inputCnt++;
+                for (uint8_t i = 1; i < inputCnt; i++) intTem *= 10;
+                intID += intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //backspace
+        if (rt_event_recv(input_event, 0x00002000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            if (!Flag_allInput) {
+                inputCnt--;
+                intID -= intTem;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            } else {
+                Flag_allInput = 0;
+
+                OLED_ShowNum(64, 16, intID, 3, 16);
+                OLED_Display_Update();
+            }
+        }
+
+        //*
+        if (rt_event_recv(input_event, 0x00000008,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            Flag_allInput = 1;
+            OLED_ShowString(64, 16, "*  ", 16);
+            OLED_Display_Update();
+        }
+
+        //#
+        if (rt_event_recv(input_event, 0x00000800,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            //do nothing
+        }
+
+        //提交
+        if (rt_event_recv(input_event, 0x00008000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            if (Flag_allInput) {
+                FP_Clear();
+                if (!FP_Receive_Buffer[9]) {
+                    OLED_showInfo_delOK();
+                    rt_thread_delay(500);
+                    return;
+                } else {
+                    Flag_errorID = 1;
+                }
+            } else {
+                FP_delModel(intID, 1);
+                if (!FP_Receive_Buffer[9]) {
+                    OLED_showInfo_delOK();
+                    rt_thread_delay(500);
+                    return;
+                } else {
+                    Flag_errorID = 1;
+                }
+            }
+        }
+    }
+}
+
+//删除失败
+void OLED_showMenu_delError(void) {
+    OLED_Clear();
+
+    //"删除失败"
+    OLED_ShowChinese(16, 16, 14);
+    OLED_ShowChinese(32, 16, 15);
+    OLED_ShowChinese(48, 16, 16);
+    OLED_ShowChinese(64, 16, 17);
+    OLED_ShowChinese(80, 16, 30);
+    OLED_ShowChinese(96, 16, 31);
+    //"请重试"
+    OLED_ShowChinese(40, 32, 32);
+    OLED_ShowChinese(56, 32, 33);
+    OLED_ShowChinese(72, 32, 34);
+
+    OLED_Display_Update();
+    BUZZ_Beep(3);
+
+    rt_thread_delay(500);
+}
+
+//删除成功
+void OLED_showInfo_delOK(void) {
+
+    OLED_Clear();
+
+    //"指纹删除成功"
+    OLED_ShowChinese(16, 16, 14);
+    OLED_ShowChinese(32, 16, 15);
+    OLED_ShowChinese(48, 16, 16);
+    OLED_ShowChinese(64, 16, 17);
+    OLED_ShowChinese(80, 16, 38);
+    OLED_ShowChinese(96, 16, 39);
+
+    FP_getModelNum();
+    uint16_t cntFP = (FP_Receive_Buffer[10] << 8) + FP_Receive_Buffer[11];
+    //"剩余指纹数:"
+    OLED_ShowChinese(16, 32, 47);
+    OLED_ShowChinese(32, 32, 48);
+    OLED_ShowChinese(48, 32, 14);
+    OLED_ShowChinese(64, 32, 15);
+    OLED_ShowChinese(80, 32, 49);
+    OLED_ShowChinese(96, 32, 8);
+
+    OLED_ShowNum(48, 48, cntFP, 4, 16);
+
+    OLED_Display_Update();
+
+    rt_thread_delay(500);
+}
+
+//显示系统信息
+void OLED_showInfo_Overall(void) {
+
+    OLED_Clear();
+
+    //"智能门锁系统"
+    OLED_ShowChinese(16, 0, 50);
+    OLED_ShowChinese(32, 0, 51);
+    OLED_ShowChinese(48, 0, 52);
+    OLED_ShowChinese(64, 0, 1);
+    OLED_ShowChinese(80, 0, 53);
+    OLED_ShowChinese(96, 0, 54);
+
+    FP_getModelNum();
+    uint16_t cntFP = (FP_Receive_Buffer[10] << 8) + FP_Receive_Buffer[11];
+    //"剩余指纹数:"
+    OLED_ShowChinese(0, 16, 47);
+    OLED_ShowChinese(16, 16, 48);
+    OLED_ShowChinese(32, 16, 14);
+    OLED_ShowChinese(48, 16, 15);
+    OLED_ShowChinese(64, 16, 49);
+    OLED_ShowChinese(80, 16, 8);
+
+    OLED_ShowNum(96, 16, cntFP, 4, 16);
+
+    //"开锁次数:"
+    OLED_ShowChinese(0, 32, 0);
+    OLED_ShowChinese(16, 32, 1);
+    OLED_ShowChinese(32, 32, 22);
+    OLED_ShowChinese(48, 32, 49);
+
+    OLED_ShowNum(64, 32, 1314, 4, 16);
+
+    //"确定"
+    OLED_ShowChinese(92, 48, 26);
+    OLED_ShowChinese(108, 48, 27);
+
+    OLED_Display_Update();
+
+    while (1) {
+
+        //确定
+        if (rt_event_recv(input_event, 0x00008000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            return;
+        }
+
+        //按下锁定按键A
+        if (rt_event_recv(input_event, 0x00001000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          RT_WAITING_NO, RT_NULL)
+            == RT_EOK) {
+            rt_event_send(input_event, 0x80000000);
+            return;
+        }
+    }
+}
+
+//显示上电欢迎界面
+void OLED_showInfo_Boot(void) {
+
+    OLED_Clear();
+
+    //"智能门锁系统"
+    OLED_ShowChinese(16, 16, 50);
+    OLED_ShowChinese(32, 16, 51);
+    OLED_ShowChinese(48, 16, 52);
+    OLED_ShowChinese(64, 16, 1);
+    OLED_ShowChinese(80, 16, 53);
+    OLED_ShowChinese(96, 16, 54);
+
+    OLED_Display_Update();
+
+    rt_thread_delay(500);
 }
 
 //OLED模块 汇总
@@ -1012,6 +1996,14 @@ void OLED_Overall(void) {
     rt_event_send(input_event, 0x80000000);
 
     while (1) {
+
+        //解锁后关锁，重新打开指纹检测
+        if (rt_event_recv(input_event, 0x0C000000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                          500, RT_NULL)
+            == RT_EOK) {
+            rt_sem_release(finger_sem);
+        }
 
         //默认进入主界面
         if (rt_event_recv(input_event, 0x80000000,
@@ -1030,11 +2022,12 @@ void OLED_Overall(void) {
         }
 
         //检测到指纹输入
-        if (rt_event_recv(input_event, 0x0000FFFF,
-                          RT_EVENT_FLAG_OR,
+        if (rt_event_recv(input_event, 0x00010000,
+                          RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           500, RT_NULL)
             == RT_EOK) {
 
+            OLED_showInfo_FPDetected();
         }
 
         //开锁 进入设置页面
@@ -1046,6 +2039,7 @@ void OLED_Overall(void) {
             OLED_showInfo_unLocking();
             MOTOR_unLock();
             OLED_showInfo_unLock();
+            rt_thread_delay(500);
             OLED_showMenu_Settings();
         }
     }
