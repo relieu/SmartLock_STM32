@@ -6,7 +6,7 @@ uint8_t OLED_GRAM[128][8];
 
 extern uint8_t FP_Receive_Buffer[];
 
-extern rt_event_t input_event;
+extern rt_event_t system_event;
 extern rt_sem_t finger_sem;
 
 //发送指令
@@ -327,7 +327,7 @@ void OLED_showMenu_Main(void) {
         OLED_Display_Update();
 
         //接收到输入event
-        if (rt_event_recv(input_event, 0x0001FFFF,
+        if (rt_event_recv(system_event, 0x0003FFFF,
                           RT_EVENT_FLAG_OR,
                           500, RT_NULL)
             == RT_EOK) {
@@ -439,16 +439,16 @@ void OLED_showMenu_Input() {
         }
 
         //按下锁定按键A
-        if (rt_event_recv(input_event, 0x00001000,
+        if (rt_event_recv(system_event, 0x00001000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
-            rt_event_send(input_event, 0x80000000);
+            rt_event_send(system_event, 0x80000000);
             return;
         }
 
         //1
-        if (rt_event_recv(input_event, 0x00000001,
+        if (rt_event_recv(system_event, 0x00000001,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -458,7 +458,7 @@ void OLED_showMenu_Input() {
         }
 
         //2
-        if (rt_event_recv(input_event, 0x00000010,
+        if (rt_event_recv(system_event, 0x00000010,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -468,7 +468,7 @@ void OLED_showMenu_Input() {
         }
 
         //3
-        if (rt_event_recv(input_event, 0x00000100,
+        if (rt_event_recv(system_event, 0x00000100,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -478,7 +478,7 @@ void OLED_showMenu_Input() {
         }
 
         //4
-        if (rt_event_recv(input_event, 0x00000002,
+        if (rt_event_recv(system_event, 0x00000002,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -488,7 +488,7 @@ void OLED_showMenu_Input() {
         }
 
         //5
-        if (rt_event_recv(input_event, 0x00000020,
+        if (rt_event_recv(system_event, 0x00000020,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -498,7 +498,7 @@ void OLED_showMenu_Input() {
         }
 
         //6
-        if (rt_event_recv(input_event, 0x00000200,
+        if (rt_event_recv(system_event, 0x00000200,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -508,7 +508,7 @@ void OLED_showMenu_Input() {
         }
 
         //7
-        if (rt_event_recv(input_event, 0x00000004,
+        if (rt_event_recv(system_event, 0x00000004,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -518,7 +518,7 @@ void OLED_showMenu_Input() {
         }
 
         //8
-        if (rt_event_recv(input_event, 0x00000040,
+        if (rt_event_recv(system_event, 0x00000040,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -528,7 +528,7 @@ void OLED_showMenu_Input() {
         }
 
         //9
-        if (rt_event_recv(input_event, 0x00000400,
+        if (rt_event_recv(system_event, 0x00000400,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -538,7 +538,7 @@ void OLED_showMenu_Input() {
         }
 
         //0
-        if (rt_event_recv(input_event, 0x00000080,
+        if (rt_event_recv(system_event, 0x00000080,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -548,7 +548,7 @@ void OLED_showMenu_Input() {
         }
 
         //backspace
-        if (rt_event_recv(input_event, 0x00002000,
+        if (rt_event_recv(system_event, 0x00002000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -558,7 +558,7 @@ void OLED_showMenu_Input() {
         }
 
         //*
-        if (rt_event_recv(input_event, 0x00000008,
+        if (rt_event_recv(system_event, 0x00000008,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -566,7 +566,7 @@ void OLED_showMenu_Input() {
         }
 
         //#
-        if (rt_event_recv(input_event, 0x00000800,
+        if (rt_event_recv(system_event, 0x00000800,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -574,7 +574,7 @@ void OLED_showMenu_Input() {
         }
 
         //显示密码
-        if (rt_event_recv(input_event, 0x00004000,
+        if (rt_event_recv(system_event, 0x00004000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -583,7 +583,7 @@ void OLED_showMenu_Input() {
         }
 
         //提交密码
-        if (rt_event_recv(input_event, 0x00008000,
+        if (rt_event_recv(system_event, 0x00008000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -599,7 +599,7 @@ void OLED_showMenu_Input() {
 
             //验证成功
             if (Flag_errorPW != 1) {
-                rt_event_send(input_event, 0x48000000);
+                rt_event_send(system_event, 0x48000000);
                 OLED_Clear();
                 OLED_showInfo_PWOK();
                 //暂停指纹检测
@@ -696,7 +696,7 @@ void OLED_showInfo_PWError(void) {
     OLED_Display_Update();
     BUZZ_Beep(3);
 
-    rt_event_send(input_event, 0x80000000);
+    rt_event_send(system_event, 0x80000000);
     rt_thread_delay(1000);
 }
 
@@ -724,19 +724,19 @@ void OLED_showMenu_Settings(void) {
     while (1) {
 
         //按下锁定按键A
-        if (rt_event_recv(input_event, 0x00001000,
+        if (rt_event_recv(system_event, 0x00001000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
             OLED_showInfo_Locking();
             MOTOR_Lock();
-            rt_event_send(input_event, 0x80000000);
+            rt_event_send(system_event, 0x80000000);
             OLED_showInfo_Lock();
             return;
         }
 
         //按下'*'键 向上
-        if (rt_event_recv(input_event, 0x00000008,
+        if (rt_event_recv(system_event, 0x00000008,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -755,7 +755,7 @@ void OLED_showMenu_Settings(void) {
         }
 
         //按下'#'键 向下
-        if (rt_event_recv(input_event, 0x00000800,
+        if (rt_event_recv(system_event, 0x00000800,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -774,7 +774,7 @@ void OLED_showMenu_Settings(void) {
         }
 
         //确认
-        if (rt_event_recv(input_event, 0x000008000,
+        if (rt_event_recv(system_event, 0x000008000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -867,16 +867,16 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //按下锁定按键A
-        if (rt_event_recv(input_event, 0x00001000,
+        if (rt_event_recv(system_event, 0x00001000,
                           RT_EVENT_FLAG_OR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
-            rt_event_send(input_event, 0x80000000);
+            rt_event_send(system_event, 0x80000000);
             return;
         }
 
         //1
-        if (rt_event_recv(input_event, 0x00000001,
+        if (rt_event_recv(system_event, 0x00000001,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -885,7 +885,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //2
-        if (rt_event_recv(input_event, 0x00000010,
+        if (rt_event_recv(system_event, 0x00000010,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -894,7 +894,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //3
-        if (rt_event_recv(input_event, 0x00000100,
+        if (rt_event_recv(system_event, 0x00000100,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -903,7 +903,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //4
-        if (rt_event_recv(input_event, 0x00000002,
+        if (rt_event_recv(system_event, 0x00000002,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -912,7 +912,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //5
-        if (rt_event_recv(input_event, 0x00000020,
+        if (rt_event_recv(system_event, 0x00000020,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -921,7 +921,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //6
-        if (rt_event_recv(input_event, 0x00000200,
+        if (rt_event_recv(system_event, 0x00000200,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -930,7 +930,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //7
-        if (rt_event_recv(input_event, 0x00000004,
+        if (rt_event_recv(system_event, 0x00000004,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -939,7 +939,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //8
-        if (rt_event_recv(input_event, 0x00000040,
+        if (rt_event_recv(system_event, 0x00000040,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -948,7 +948,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //9
-        if (rt_event_recv(input_event, 0x00000400,
+        if (rt_event_recv(system_event, 0x00000400,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -957,7 +957,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //0
-        if (rt_event_recv(input_event, 0x00000080,
+        if (rt_event_recv(system_event, 0x00000080,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -966,7 +966,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //backspace
-        if (rt_event_recv(input_event, 0x00002000,
+        if (rt_event_recv(system_event, 0x00002000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -975,7 +975,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //*
-        if (rt_event_recv(input_event, 0x00000008,
+        if (rt_event_recv(system_event, 0x00000008,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -983,7 +983,7 @@ void OLED_showMenu_resetPW(void) {
         }
 
         //#
-        if (rt_event_recv(input_event, 0x00000800,
+        if (rt_event_recv(system_event, 0x00000800,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -994,14 +994,14 @@ void OLED_showMenu_resetPW(void) {
         OLED_Display_Update();
 
         //确认修改
-        if (rt_event_recv(input_event, 0x00008000,
+        if (rt_event_recv(system_event, 0x00008000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
             FLASH_writeData((uint8_t *) inputStr, 6);
             OLED_showInfo_resetOk();
             rt_thread_delay(500);
-            rt_event_send(input_event, 0x00001000);
+            rt_event_send(system_event, 0x00001000);
         }
     }
 
@@ -1168,16 +1168,16 @@ void OLED_showMenu_resetTime(void) {
         }
 
         //按下锁定按键A
-        if (rt_event_recv(input_event, 0x00001000,
+        if (rt_event_recv(system_event, 0x00001000,
                           RT_EVENT_FLAG_OR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
-            rt_event_send(input_event, 0x80000000);
+            rt_event_send(system_event, 0x80000000);
             return;
         }
 
         //按下'*'键 向上/左
-        if (rt_event_recv(input_event, 0x00000008,
+        if (rt_event_recv(system_event, 0x00000008,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1267,7 +1267,7 @@ void OLED_showMenu_resetTime(void) {
         }
 
         //按下'#'键 向下/右
-        if (rt_event_recv(input_event, 0x00000800,
+        if (rt_event_recv(system_event, 0x00000800,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1357,7 +1357,7 @@ void OLED_showMenu_resetTime(void) {
         }
 
         //按下'0'键 修改/锁定
-        if (rt_event_recv(input_event, 0x00000080,
+        if (rt_event_recv(system_event, 0x00000080,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1375,7 +1375,7 @@ void OLED_showMenu_resetTime(void) {
         }
 
         //确认修改
-        if (rt_event_recv(input_event, 0x00008000,
+        if (rt_event_recv(system_event, 0x00008000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1418,7 +1418,7 @@ void OLED_showInfo_FPDetected(void) {
     } else {
         OLED_showInfo_FPOk();
         rt_thread_delay(500);
-        rt_event_send(input_event, 0x44000000);
+        rt_event_send(system_event, 0x44000000);
     }
 }
 
@@ -1444,7 +1444,7 @@ void OLED_showInfo_FPError(void) {
     BUZZ_Beep(3);
 
     rt_thread_delay(500);
-    rt_event_send(input_event, 0x80000000);
+    rt_event_send(system_event, 0x80000000);
     rt_sem_release(finger_sem);
 }
 
@@ -1490,7 +1490,7 @@ void OLED_showInfo_addFP(void) {
     rt_sem_release(finger_sem);
 
     //检测到指纹输入
-    if (rt_event_recv(input_event, 0x00010000,
+    if (rt_event_recv(system_event, 0x00010000,
                       RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                       10000, RT_NULL)
         == RT_EOK) { ;
@@ -1525,7 +1525,7 @@ void OLED_showInfo_addFP(void) {
     rt_sem_release(finger_sem);
 
     //检测到指纹输入
-    if (rt_event_recv(input_event, 0x00010000,
+    if (rt_event_recv(system_event, 0x00010000,
                       RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                       10000, RT_NULL)
         == RT_EOK) { ;
@@ -1628,16 +1628,16 @@ void OLED_showMenu_delFP(void) {
         }
 
         //按下锁定按键A
-        if (rt_event_recv(input_event, 0x00001000,
+        if (rt_event_recv(system_event, 0x00001000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
-            rt_event_send(input_event, 0x80000000);
+            rt_event_send(system_event, 0x80000000);
             return;
         }
 
         //1
-        if (rt_event_recv(input_event, 0x00000001,
+        if (rt_event_recv(system_event, 0x00000001,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1653,7 +1653,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //2
-        if (rt_event_recv(input_event, 0x00000010,
+        if (rt_event_recv(system_event, 0x00000010,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1669,7 +1669,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //3
-        if (rt_event_recv(input_event, 0x00000100,
+        if (rt_event_recv(system_event, 0x00000100,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1685,7 +1685,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //4
-        if (rt_event_recv(input_event, 0x00000002,
+        if (rt_event_recv(system_event, 0x00000002,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1701,7 +1701,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //5
-        if (rt_event_recv(input_event, 0x00000020,
+        if (rt_event_recv(system_event, 0x00000020,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1717,7 +1717,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //6
-        if (rt_event_recv(input_event, 0x00000200,
+        if (rt_event_recv(system_event, 0x00000200,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1733,7 +1733,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //7
-        if (rt_event_recv(input_event, 0x00000004,
+        if (rt_event_recv(system_event, 0x00000004,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1749,7 +1749,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //8
-        if (rt_event_recv(input_event, 0x00000040,
+        if (rt_event_recv(system_event, 0x00000040,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1765,7 +1765,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //9
-        if (rt_event_recv(input_event, 0x00000400,
+        if (rt_event_recv(system_event, 0x00000400,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1781,7 +1781,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //0
-        if (rt_event_recv(input_event, 0x00000080,
+        if (rt_event_recv(system_event, 0x00000080,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1797,7 +1797,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //backspace
-        if (rt_event_recv(input_event, 0x00002000,
+        if (rt_event_recv(system_event, 0x00002000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1816,7 +1816,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //*
-        if (rt_event_recv(input_event, 0x00000008,
+        if (rt_event_recv(system_event, 0x00000008,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1826,7 +1826,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //#
-        if (rt_event_recv(input_event, 0x00000800,
+        if (rt_event_recv(system_event, 0x00000800,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1834,7 +1834,7 @@ void OLED_showMenu_delFP(void) {
         }
 
         //提交
-        if (rt_event_recv(input_event, 0x00008000,
+        if (rt_event_recv(system_event, 0x00008000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1955,7 +1955,7 @@ void OLED_showInfo_Overall(void) {
     while (1) {
 
         //确定
-        if (rt_event_recv(input_event, 0x00008000,
+        if (rt_event_recv(system_event, 0x00008000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
@@ -1963,11 +1963,11 @@ void OLED_showInfo_Overall(void) {
         }
 
         //按下锁定按键A
-        if (rt_event_recv(input_event, 0x00001000,
+        if (rt_event_recv(system_event, 0x00001000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           RT_WAITING_NO, RT_NULL)
             == RT_EOK) {
-            rt_event_send(input_event, 0x80000000);
+            rt_event_send(system_event, 0x80000000);
             return;
         }
     }
@@ -1993,12 +1993,12 @@ void OLED_showInfo_Boot(void) {
 
 //OLED模块 汇总
 void OLED_Overall(void) {
-    rt_event_send(input_event, 0x80000000);
+    rt_event_send(system_event, 0x80000000);
 
     while (1) {
 
         //解锁后关锁，重新打开指纹检测
-        if (rt_event_recv(input_event, 0x0C000000,
+        if (rt_event_recv(system_event, 0x0C000000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           500, RT_NULL)
             == RT_EOK) {
@@ -2006,7 +2006,7 @@ void OLED_Overall(void) {
         }
 
         //默认进入主界面
-        if (rt_event_recv(input_event, 0x80000000,
+        if (rt_event_recv(system_event, 0x80000000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           500, RT_NULL)
             == RT_EOK) {
@@ -2014,7 +2014,7 @@ void OLED_Overall(void) {
         }
 
         //检测到按键输入
-        if (rt_event_recv(input_event, 0x00000FFF,
+        if (rt_event_recv(system_event, 0x00000FFF,
                           RT_EVENT_FLAG_OR,
                           500, RT_NULL)
             == RT_EOK) {
@@ -2022,7 +2022,7 @@ void OLED_Overall(void) {
         }
 
         //检测到指纹输入
-        if (rt_event_recv(input_event, 0x00010000,
+        if (rt_event_recv(system_event, 0x00010000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           500, RT_NULL)
             == RT_EOK) {
@@ -2031,7 +2031,7 @@ void OLED_Overall(void) {
         }
 
         //开锁 进入设置页面
-        if (rt_event_recv(input_event, 0x40000000,
+        if (rt_event_recv(system_event, 0x40000000,
                           RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
                           500, RT_NULL)
             == RT_EOK) {

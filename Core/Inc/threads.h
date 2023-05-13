@@ -9,4 +9,8 @@ void oled_thread_entry(void *parameters);
 
 void finger_thread_entry(void *parameters);
 
+void wifi_thread_entry(void *parameters);
+
+void wifi_send_thread_entry(void *parameters);
+
 #endif //SMARTLOCK_STM32_THREADS_H

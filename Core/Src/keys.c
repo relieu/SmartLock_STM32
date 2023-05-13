@@ -20,7 +20,7 @@ void KEYS_BellKey_Press() {
 
 
 extern rt_sem_t uart2_sem;
-extern rt_event_t input_event;
+extern rt_event_t system_event;
 
 //按键扫描
 void KEYS_Scan(void) {
@@ -38,22 +38,22 @@ void KEYS_Scan(void) {
         if (!HAL_GPIO_ReadPin(KEYS_ROW1_GPIO_Port, KEYS_ROW1_Pin)) {
             rt_kprintf("1\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 0));
+            rt_event_send(system_event, (1 << 0));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW2_GPIO_Port, KEYS_ROW2_Pin)) {
             rt_kprintf("4\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 1));
+            rt_event_send(system_event, (1 << 1));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW3_GPIO_Port, KEYS_ROW3_Pin)) {
             rt_kprintf("7\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 2));
+            rt_event_send(system_event, (1 << 2));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW4_GPIO_Port, KEYS_ROW4_Pin)) {
             rt_kprintf("*\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 3));
+            rt_event_send(system_event, (1 << 3));
         }
 
         HAL_GPIO_WritePin(KEYS_COL1_GPIO_Port, KEYS_COL1_Pin, GPIO_PIN_SET);
@@ -65,22 +65,22 @@ void KEYS_Scan(void) {
         if (!HAL_GPIO_ReadPin(KEYS_ROW1_GPIO_Port, KEYS_ROW1_Pin)) {
             rt_kprintf("2\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 4));
+            rt_event_send(system_event, (1 << 4));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW2_GPIO_Port, KEYS_ROW2_Pin)) {
             rt_kprintf("5\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 5));
+            rt_event_send(system_event, (1 << 5));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW3_GPIO_Port, KEYS_ROW3_Pin)) {
             rt_kprintf("8\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 6));
+            rt_event_send(system_event, (1 << 6));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW4_GPIO_Port, KEYS_ROW4_Pin)) {
             rt_kprintf("0\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 7));
+            rt_event_send(system_event, (1 << 7));
         }
 
         HAL_GPIO_WritePin(KEYS_COL2_GPIO_Port, KEYS_COL2_Pin, GPIO_PIN_SET);
@@ -92,22 +92,22 @@ void KEYS_Scan(void) {
         if (!HAL_GPIO_ReadPin(KEYS_ROW1_GPIO_Port, KEYS_ROW1_Pin)) {
             rt_kprintf("3\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 8));
+            rt_event_send(system_event, (1 << 8));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW2_GPIO_Port, KEYS_ROW2_Pin)) {
             rt_kprintf("6\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 9));
+            rt_event_send(system_event, (1 << 9));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW3_GPIO_Port, KEYS_ROW3_Pin)) {
             rt_kprintf("9\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 10));
+            rt_event_send(system_event, (1 << 10));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW4_GPIO_Port, KEYS_ROW4_Pin)) {
             rt_kprintf("#\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 11));
+            rt_event_send(system_event, (1 << 11));
         }
 
         HAL_GPIO_WritePin(KEYS_COL3_GPIO_Port, KEYS_COL3_Pin, GPIO_PIN_SET);
@@ -119,22 +119,22 @@ void KEYS_Scan(void) {
         if (!HAL_GPIO_ReadPin(KEYS_ROW1_GPIO_Port, KEYS_ROW1_Pin)) {
             rt_kprintf("A\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 12));
+            rt_event_send(system_event, (1 << 12));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW2_GPIO_Port, KEYS_ROW2_Pin)) {
             rt_kprintf("B\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 13));
+            rt_event_send(system_event, (1 << 13));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW3_GPIO_Port, KEYS_ROW3_Pin)) {
             rt_kprintf("C\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 14));
+            rt_event_send(system_event, (1 << 14));
         }
         if (!HAL_GPIO_ReadPin(KEYS_ROW4_GPIO_Port, KEYS_ROW4_Pin)) {
             rt_kprintf("D\r\n");
             BUZZ_Beep(1);
-            rt_event_send(input_event, (1 << 15));
+            rt_event_send(system_event, (1 << 15));
         }
 
         HAL_GPIO_WritePin(KEYS_COL4_GPIO_Port, KEYS_COL4_Pin, GPIO_PIN_SET);

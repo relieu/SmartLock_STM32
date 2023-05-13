@@ -47,6 +47,7 @@ extern "C" {
 #include "flash.h"
 #include "motor.h"
 #include "threads.h"
+#include "wifi.h"
 
 #include "rtthread.h"
 /* USER CODE END Includes */
@@ -108,6 +109,8 @@ void Error_Handler(void);
 #define KEYS_COL1_GPIO_Port GPIOD
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
+#define WIFI_EN_Pin GPIO_PIN_8
+#define WIFI_EN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define TRUE 1
